@@ -7,10 +7,10 @@ using TMPro;
 public class ToggleSwitch : MonoBehaviour
 {
     [Header("UI 참조")]
-    public RectTransform handle;          // 동그라미
-    public RectTransform labelRect;       // 텍스트의 RectTransform
-    public Image background;              // 배경
-    public TextMeshProUGUI labelText;     // 텍스트
+    public RectTransform handle;
+    public RectTransform labelRect;
+    public Image background;
+    public TextMeshProUGUI labelText;
 
     [Header("스프라이트")]
     public Sprite onSprite;
@@ -19,13 +19,14 @@ public class ToggleSwitch : MonoBehaviour
     [Header("텍스트")]
     public string onText = "On";
     public string offText = "Off";
+    public Color onTextColor = Color.white;                          // On일 때 텍스트 색
+    public Color offTextColor = new Color(0.35f, 0.22f, 0.12f);      // Off일 때 어두운 색
 
     [Header("위치 설정")]
-    public float handleOnX = 30f;         // On일 때 핸들 위치
-    public float handleOffX = -30f;       // Off일 때 핸들 위치
-
-    public float labelOnX = -30f;         // On일 때 텍스트 위치 (핸들 반대쪽)
-    public float labelOffX = 30f;         // Off일 때 텍스트 위치 (핸들 반대쪽)
+    public float handleOnX = 23f;
+    public float handleOffX = -16.4f;
+    public float labelOnX = -10f;
+    public float labelOffX = 16f;
 
     [Header("애니메이션")]
     public float duration = 0.25f;
@@ -61,38 +62,33 @@ public class ToggleSwitch : MonoBehaviour
         float targetLabelX = isOn ? labelOnX : labelOffX;
         Sprite targetSprite = isOn ? onSprite : offSprite;
         string targetText = isOn ? onText : offText;
+        Color targetTextColor = isOn ? onTextColor : offTextColor;
 
-        // 배경 변경
+        // 배경 이미지 변경
         if (background != null && targetSprite != null)
             background.sprite = targetSprite;
 
-        // 텍스트 내용 변경
+        // 텍스트 내용 + 색상 + 위치 바로 변경
         if (labelText != null)
+        {
             labelText.text = targetText;
+            labelText.color = targetTextColor;
+        }
+
+        if (labelRect != null)
+            labelRect.anchoredPosition = new Vector2(targetLabelX, labelRect.anchoredPosition.y);
 
         if (instant)
         {
             handle.anchoredPosition = new Vector2(targetHandleX, handle.anchoredPosition.y);
-            if (labelRect != null)
-                labelRect.anchoredPosition = new Vector2(targetLabelX, labelRect.anchoredPosition.y);
             isAnimating = false;
         }
         else
         {
-            // 핸들 이동
-            handle.DOAnchorPosX(targetHandleX, duration).SetEase(easeType);
-
-            // 텍스트 위치 이동
-            if (labelRect != null)
-            {
-                labelRect.DOAnchorPosX(targetLabelX, duration)
-                    .SetEase(easeType)
-                    .OnComplete(() => isAnimating = false);
-            }
-            else
-            {
-                isAnimating = false;
-            }
+            handle.DOKill();
+            handle.DOAnchorPosX(targetHandleX, duration)
+                .SetEase(easeType)
+                .OnComplete(() => isAnimating = false);
         }
     }
 
